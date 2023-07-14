@@ -1,26 +1,7 @@
 /* Implementing LSB (Last Significant Bit) steganography */
 
 #include "lsb.h"
-
-const char *byte_to_binary(char x)
-{
-    static char b[9];
-    b[0] = '\0';
-
-    int z;
-    for (z = 128; z > 0; z >>= 1)
-        strncat(b, ((x & z) == z) ? "1" : "0", 1);
-
-    return b;
-}
-
-unsigned char reverse(unsigned char b)
-{
-    b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
-    b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
-    b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
-    return b;
-}
+#include "utils.h"
 
 int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
 {
@@ -101,10 +82,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         {
             new_value = (c_tocover & 1);
             c_covering = fgetc(covering_file);
-            printf("[DEBUG] (directly after reading) c_covering=%c, to_binary(c_covering)=%s, hexa=%#02x\n", c_covering, byte_to_binary(c_covering), c_covering);
             c_covering_stagged = (c_covering & ~1) | (new_value & 1);
-            printf("[DEBUG] lsb_stegging(): new_value=%s, c_covering=%s, c_covering_stagged=%s\n", byte_to_binary(new_value), byte_to_binary(c_covering), byte_to_binary(c_covering_stagged));
-            printf("[DEBUG] lsb_stagging(): c_covering_stagged=%#02x\n", c_covering_stagged);
             fputc(c_covering_stagged, output_file);
             ncprinted++;
             c_tocover >>= 1;
@@ -122,10 +100,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         {
             new_value = (c_tocover & 1);
             c_covering = fgetc(covering_file);
-            printf("[DEBUG] (writing number of bytes) c_covering=%c, to_binary(c_covering)=%s, hexa=%#02x\n", c_covering, byte_to_binary(c_covering), c_covering);
             c_covering_stagged = (c_covering & ~1) | (new_value & 1);
-            printf("[DEBUG] lsb_stegging(): new_value=%s, c_covering=%s, c_covering_stagged=%s\n", byte_to_binary(new_value), byte_to_binary(c_covering), byte_to_binary(c_covering_stagged));
-            printf("[DEBUG] lsb_stagging(): c_covering_stagged=%#02x\n", c_covering_stagged);
             fputc(c_covering_stagged, output_file);
             ncprinted++;
             c_tocover >>= 1;
@@ -133,52 +108,11 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         fsarr_ind++;
     }
 
-    printf("[DEBUG] n printed characters: %lu\n", ncprinted);
     printf("[INFO]: %s lsb-stegg'ed in %s, output in %s\n", tocover_fp, covering_fp, output_fp);
 
     fclose(covering_file);
     fclose(tocover_file);
     fclose(output_file);
-
-    return EXIT_SUCCESS;
-}
-
-int copy_file(char *inpath, char *outpath)
-{
-    FILE *sourceFile, *destFile;
-    unsigned char ch;
-
-    // Open the source file in read mode
-    sourceFile = fopen(inpath, "rb");
-    if (sourceFile == NULL)
-    {
-        printf("Unable to open the source file.\n");
-        return EXIT_FAILURE;
-    }
-
-    // Open the destination file in write mode
-    destFile = fopen(outpath, "wb");
-    if (destFile == NULL)
-    {
-        printf("Unable to create the destination file.\n");
-        return EXIT_FAILURE;
-    }
-
-    // Copy the contents byte by byte
-    size_t n_bytes_copied = 0;
-    while (((ch = fgetc(sourceFile)) != EOF) && !feof(sourceFile))
-    {
-        fputc(ch, destFile);
-        n_bytes_copied++;
-        if (n_bytes_copied % 1000 == 0)
-            printf("%lu kb copied\n", n_bytes_copied / 1000);
-    }
-
-    printf("File copied successfully.\n");
-
-    // Close the files
-    fclose(sourceFile);
-    fclose(destFile);
 
     return EXIT_SUCCESS;
 }
@@ -226,7 +160,6 @@ int lsb_unstegging(char *input_fp, char *output_fp)
             fsarr[read_ind] = extracted_ch;
             if (extracted_ch == '\0')
                 break;
-            printf("[INFO] lsb_unstegging(): reading message size: extracted_ch=%c\n", extracted_ch);
             extracted_ch = 0;
         }
         ncread++;
@@ -259,7 +192,6 @@ int lsb_unstegging(char *input_fp, char *output_fp)
             extracted_ch = reverse(extracted_ch);
             read_ind = ncread / N_BITS_IN_BYTE - 1;
             fputc(extracted_ch, output_file);
-            printf("[INFO] lsb_unstegging(): reading message size: extracted_ch=%c\n", extracted_ch);
             extracted_ch = 0;
         }
         ncread++;
