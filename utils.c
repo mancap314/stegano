@@ -12,6 +12,7 @@ const char *byte_to_binary(char x)
     return b;
 }
 
+// Reverse byte
 unsigned char reverse(unsigned char b)
 {
     // from: https://stackoverflow.com/questions/2602823/in-c-c-whats-the-simplest-way-to-reverse-the-order-of-bits-in-a-byte
@@ -59,4 +60,12 @@ int copy_file(char *inpath, char *outpath)
     fclose(destFile);
 
     return EXIT_SUCCESS;
+}
+
+const char *get_filename_ext(const char *filename)
+{
+    const char *dot = strrchr(filename, '.');
+    if (!dot || dot == filename)
+        return "";
+    return dot + 1;
 }

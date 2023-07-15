@@ -43,9 +43,9 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         return EXIT_FAILURE;
     }
 
-    if ((covering_flength - 1) < (N_BITS_IN_BYTE * (tocover_flength + CHFORFS)))
+    if ((covering_flength - 1) < (N_BITS_IN_BYTE * (tocover_flength + CHFORFS + CHFOREXT)))
     {
-        fprintf(stderr, "[ERROR] lsb stegging: %s has size %lu; but max. %lu can be lsb-stegg'ed in %s of size %lu.\n", tocover_fp, tocover_flength, (size_t)((covering_flength - 1) / N_BITS_IN_BYTE - CHFORFS), covering_fp, covering_flength);
+        fprintf(stderr, "[ERROR] lsb stegging: %s has size %lu; but max. %lu can be lsb-stegg'ed in %s of size %lu.\n", tocover_fp, tocover_flength, (size_t)((covering_flength - 1) / N_BITS_IN_BYTE - CHFORFS - CHFOREXT), covering_fp, covering_flength);
         fclose(tocover_file);
         fclose(covering_file);
         return EXIT_FAILURE;
@@ -63,7 +63,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         return EXIT_FAILURE;
     }
 
-    size_t n_bytes_to_copy = covering_flength - (N_BITS_IN_BYTE * (tocover_flength + CHFORFS));
+    size_t n_bytes_to_copy = covering_flength - (N_BITS_IN_BYTE * (tocover_flength + CHFORFS + CHFOREXT));
     unsigned char c_covering;
     while (((c_covering = fgetc(covering_file)) != EOF) && !feof(covering_file) && (ncprinted < n_bytes_to_copy))
     {
@@ -75,7 +75,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
     unsigned char c_tocover;
     unsigned char c_covering_stagged;
     unsigned char new_value;
-    while (((c_tocover = fgetc(tocover_file)) != EOF) && !feof(tocover_file) && (ncprinted <= covering_flength - CHFORFS * N_BITS_IN_BYTE))
+    while (((c_tocover = fgetc(tocover_file)) != EOF) && !feof(tocover_file) && (ncprinted <= covering_flength - (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE))
     {
         // printf("[DEBUG] lsb_stegging(): c_tocover=%s\n", byte_to_binary(c_tocover));
         for (uint8_t i = 0; i < N_BITS_IN_BYTE; i++)
@@ -89,9 +89,29 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
         }
     }
 
+    // Writing the file extension
+    const char *input_ext = get_filename_ext(tocover_fp);
+    char extarr[CHFOREXT + 1] = {0};
+    snprintf(extarr, CHFOREXT + 1, "%s", input_ext);
+    uint8_t extarr_ind = 0;
+    while ((extarr_ind < CHFOREXT) && (ncprinted <= covering_flength))
+    {
+        c_tocover = extarr[extarr_ind];
+        for (uint8_t i = 0; i < N_BITS_IN_BYTE; i++)
+        {
+            new_value = (c_tocover & 1);
+            c_covering = fgetc(covering_file);
+            c_covering_stagged = (c_covering & ~1) | (new_value & 1);
+            fputc(c_covering_stagged, output_file);
+            ncprinted++;
+            c_tocover >>= 1;
+        }
+        extarr_ind++;
+    }
+
     // Writing the number of bytes to read
     char fsarr[CHFORFS + 1] = {0}; // containing tocover_flength as a string
-    snprintf(fsarr, CHFORFS, "%ld", tocover_flength);
+    snprintf(fsarr, CHFORFS + 1, "%ld", tocover_flength);
     uint8_t fsarr_ind = 0;
     while ((fsarr_ind < CHFORFS) && (ncprinted <= covering_flength))
     {
@@ -137,8 +157,8 @@ int lsb_unstegging(char *input_fp, char *output_fp)
         return EXIT_FAILURE;
     }
 
-    // Read message size
-    if (input_flength < (CHFORFS * N_BITS_IN_BYTE))
+    // Read message extension and size
+    if (input_flength < (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE)
     {
         fprintf(stderr, "[ERROR] lsb_unstegging(): reading message length: size of %s : %lu < %u\n", input_fp, input_flength, CHFORFS * N_BITS_IN_BYTE);
         return EXIT_FAILURE;
@@ -146,9 +166,10 @@ int lsb_unstegging(char *input_fp, char *output_fp)
     unsigned char ch;
     size_t ncread = 0; // number of read characters
     size_t read_ind = 0;
+    char extarr[CHFOREXT + 1] = {0};
     char fsarr[CHFORFS + 1] = {0};
     unsigned char extracted_ch = 0;
-    fseek(input_file, (input_flength - 2 - CHFORFS * N_BITS_IN_BYTE), SEEK_SET);
+    fseek(input_file, (input_flength - 2 - (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE), SEEK_SET);
     while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread < CHFORFS * N_BITS_IN_BYTE))
     {
         extracted_ch = extracted_ch | (ch & 1);
@@ -157,17 +178,23 @@ int lsb_unstegging(char *input_fp, char *output_fp)
         {
             extracted_ch = reverse(extracted_ch);
             read_ind = ncread / N_BITS_IN_BYTE - 1;
-            fsarr[read_ind] = extracted_ch;
-            if (extracted_ch == '\0')
+            if (read_ind < CHFOREXT)
+            {
+                extarr[read_ind] = extracted_ch;
+            }
+            else
+            {
+                fsarr[read_ind - CHFOREXT] = extracted_ch;
+            }
+            if ((extracted_ch == '\0') && (read_ind > CHFOREXT))
                 break;
             extracted_ch = 0;
         }
         ncread++;
     }
-    fsarr[read_ind + 1] = '\0';
 
     size_t message_size = (size_t)atoi(fsarr);
-    printf("[INFO] lsb_unstegging(): message_size=%lu\n", message_size);
+    printf("[INFO] lsb_unstegging(): message_extension=%s, message_size=%lu\n", extarr, message_size);
     if (input_flength < (message_size + CHFORFS) * N_BITS_IN_BYTE)
     {
         fprintf(stderr, "[ERROR] lsb_unstegging(): size of %s: %lu too small for message size: %lu\n", input_fp, input_flength, message_size);
@@ -176,13 +203,23 @@ int lsb_unstegging(char *input_fp, char *output_fp)
 
     // Read Message and write it in the output
     ncread = 0;
-    FILE *output_file = fopen(output_fp, "wb");
+    FILE *output_file;
+    char output_fp_ext[strlen(output_fp) + 1 + CHFOREXT + 1];
+    if (strlen(extarr) == 0)
+    {
+        output_file = fopen(output_fp, "wb");
+    }
+    else // file extension is appended to `output_fp`, that (therefore) doesn't need to have the file extension
+    {
+        snprintf(output_fp_ext, sizeof(output_fp_ext), "%s.%s", output_fp, extarr);
+        output_file = fopen(output_fp_ext, "wb");
+    }
     if (output_file == NULL)
     {
-        fprintf(stderr, "[ERROR] lsb_unstegging(): Could not open output file at %s\n", output_fp);
+        fprintf(stderr, "[ERROR] lsb_unstegging(): Could not open output file at %s\n", (strlen(extarr) == 0) ? output_fp : output_fp_ext);
         return EXIT_FAILURE;
     }
-    fseek(input_file, (input_flength - 2 - (message_size + CHFORFS) * N_BITS_IN_BYTE), SEEK_SET);
+    fseek(input_file, (input_flength - 2 - (message_size + CHFORFS + CHFOREXT) * N_BITS_IN_BYTE), SEEK_SET);
     while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread < message_size * N_BITS_IN_BYTE))
     {
         extracted_ch = extracted_ch | (ch & 1);

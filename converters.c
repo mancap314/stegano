@@ -57,75 +57,61 @@ int bmp2jpg(char *input_fp, char *output_fp)
 
     printf("Image converted successfully: from %s to %s\n", input_fp, output_fp);
 
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }
 
-// Install libjpeg and verify
-/*
-int jpg2bmp(char* input_fp, char* output_fp) {
-    FILE *inputFile, *outputFile;
-    struct jpeg_decompress_struct cinfo;
-    struct jpeg_error_mgr jerr;
-
-    JSAMPARRAY buffer;
-    int rowStride;
-
-    // Open the input JPEG file
-    inputFile = fopen(input_fp, "rb");
-    if (inputFile == NULL) {
-        fprintf(stderr, "Error opening input file.\n");
-        return 1;
+int png2bmp(char *input_fp, char *output_fp)
+{
+    // Load PNG image using FreeImage
+    FIBITMAP *image = FreeImage_Load(FIF_PNG, input_fp, PNG_DEFAULT);
+    if (!image)
+    {
+        fprintf(stderr, "[ERROR] png2bmp(): Could not load image at %s\n", input_fp);
+        return EXIT_FAILURE;
     }
 
-    // Initialize the JPEG decompression object
-    cinfo.err = jpeg_std_error(&jerr);
-    jpeg_create_decompress(&cinfo);
+    // Convert image to 24-bit BMP
+    FIBITMAP *convertedImage = FreeImage_ConvertTo24Bits(image);
+    FreeImage_Unload(image);
 
-    // Set the source file
-    jpeg_stdio_src(&cinfo, inputFile);
-
-    // Read the JPEG header
-    jpeg_read_header(&cinfo, TRUE);
-
-    // Start the decompression process
-    jpeg_start_decompress(&cinfo);
-
-    // Prepare the output BMP file
-    outputFile = fopen(output_fp, "wb");
-    if (outputFile == NULL) {
-        fprintf(stderr, "Error creating output file.\n");
-        return 1;
+    // Save BMP image
+    if (!FreeImage_Save(FIF_BMP, convertedImage, output_fp, BMP_DEFAULT))
+    {
+        fprintf(stderr, "[ERROR] png2bmp(): Could not save BMP image at %s\n", output_fp);
+        FreeImage_Unload(convertedImage);
+        return EXIT_FAILURE;
     }
 
-    // Calculate the row stride (bytes per scanline)
-    rowStride = cinfo.output_width * cinfo.output_components;
-
-    // Allocate a buffer for storing scanlines
-    buffer = (*cinfo.mem->alloc_sarray)((j_common_ptr)&cinfo, JPOOL_IMAGE, rowStride, 1);
-
-    // Write the BMP file header
-    unsigned char bmpHeader[54] = {
-        0x42, 0x4D, 0x36, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x28, 0x00,
-        0x00, 0x00, 0xC8, 0x00, 0x00, 0x00, 0xC8, 0xFF, 0xFF, 0xFF, 0x01, 0x00, 0x18, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x30, 0x00, 0x00, 0x0C, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x13, 0x0B, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x00
-    };
-    fwrite(bmpHeader, sizeof(unsigned char), 54, outputFile);
-
-    // Read scanlines and write to the BMP file
-    while (cinfo.output_scanline < cinfo.output_height) {
-        jpeg_read_scanlines(&cinfo, buffer, 1);
-        fwrite(buffer[0], sizeof(unsigned char), rowStride, outputFile);
-    }
-
-    // Finish decompression and release resources
-    jpeg_finish_decompress(&cinfo);
-    jpeg_destroy_decompress(&cinfo);
-    fclose(inputFile);
-    fclose(outputFile);
-
-    printf("JPEG to BMP conversion completed.\n");
+    FreeImage_Unload(convertedImage);
+    printf("[INFO] png2bmp(): Conversion completed successfully from %s to %s\n", input_fp, output_fp);
 
     return EXIT_SUCCESS;
 }
-*/
+
+int bmp2png(char *input_fp, char *output_fp)
+{
+    // Load BMP image using FreeImage
+    FIBITMAP *image = FreeImage_Load(FIF_BMP, input_fp, BMP_DEFAULT);
+    if (!image)
+    {
+        fprintf(stderr, "[ERROR] bmp2png(): Failed loading BMP image at %s\n", input_fp);
+        return EXIT_FAILURE;
+    }
+
+    // Convert image to 24-bit PNG
+    FIBITMAP *convertedImage = FreeImage_ConvertTo24Bits(image);
+    FreeImage_Unload(image);
+
+    // Save PNG image
+    if (!FreeImage_Save(FIF_PNG, convertedImage, output_fp, PNG_DEFAULT))
+    {
+        fprintf(stderr, "[ERROR] bmp2png(): Failed saving PNG image to %s\n", output_fp);
+        FreeImage_Unload(convertedImage);
+        return EXIT_FAILURE;
+    }
+
+    FreeImage_Unload(convertedImage);
+    printf("[INFO] bmp2png(): Conversion completed successfully from %s to %s\n", input_fp, output_fp);
+
+    return EXIT_SUCCESS;
+}

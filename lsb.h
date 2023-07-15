@@ -10,6 +10,8 @@
 #define BUFFER_SIZE 1000
 // Number of characters for file size: CHFORFS
 #define CHFORFS 8
+// Number of characters for file extension: CHFOREXT
+#define CHFOREXT 4
 
 int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp);
 int lsb_unstegging(char *input_fp, char *output_fp);
