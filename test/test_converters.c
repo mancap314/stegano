@@ -2,32 +2,32 @@
 
 int test_jpg2bmp()
 {
-    char *input_fp = "data/moi-hoodie-back.jpg";
-    char *output_fp = "data/moi-hoodie.bmp";
+    char *input_fp = "data/fractal_2.jpg";
+    char *output_fp = "data/fractal_2.bmp";
     int ret = jpg2bmp(input_fp, output_fp);
     return ret;
 }
 
 int test_bmp2jpg()
 {
-    char *input_fp = "data/moi-hoodie.bmp";
-    char *output_fp = "data/moi-hoodie-back-back.jpg";
+    char *input_fp = "data/fractal_2.bmp";
+    char *output_fp = "data/fractal_2_back.jpg";
     int ret = bmp2jpg(input_fp, output_fp);
     return ret;
 }
 
 int test_png2bmp()
 {
-    char *input_fp = "data/airport-back.png";
-    char *output_fp = "data/airport.bmp";
+    char *input_fp = "data/fractal.png";
+    char *output_fp = "data/fractal.bmp";
     int ret = png2bmp(input_fp, output_fp);
     return ret;
 }
 
 int test_bmp2png()
 {
-    char *input_fp = "data/airport.bmp";
-    char *output_fp = "data/airport-back-back.png";
+    char *input_fp = "data/fractal.bmp";
+    char *output_fp = "data/fractal.png";
     int ret = bmp2png(input_fp, output_fp);
     return ret;
 }
