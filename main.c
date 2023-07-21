@@ -18,7 +18,7 @@ int main(int argc, char *argv[argc + 1])
 
     for (uint8_t i = 1; i < argc + 1; i++)
     {
-        if (!strncmp(argv[i], "-h", 2) || !strncpm(argv[i], "--help", 6))
+        if (!strncmp(argv[i], "-h", 2) || !strncmp(argv[i], "--help", 6))
         {
             printf("%s", usage);
             return EXIT_SUCCESS;
@@ -79,8 +79,26 @@ int main(int argc, char *argv[argc + 1])
         printf("%s", usage);
         exit(EXIT_FAILURE);
     }
+    if (!insertion && tocover_ind > 0)
+    {
+        printf("[WARNING] argument -t / --tocover ignored when extracting.\n");
+    }
 
     int ret = emdebed(argv[covering_ind], argv[tocover_ind], argv[output_ind], tobmp, insertion);
 
-    // TODO: display message corresponding to `action` and `ret`
+    char message[300];
+    if (insertion)
+    {
+        snprintf(message, 300, "[%s] File %s covered into file %s. Result in %s. %s.\n",
+                 (ret == EXIT_SUCCESS) ? "INFO" : "ERROR", argv[tocover_ind], argv[covering_ind], argv[output_ind], (ret == EXIT_SUCCESS) ? "OK" : "FAILED");
+        (ret == EXIT_SUCCESS) ? printf("%s", message) : fprintf(stderr, "%s", message);
+    }
+    else
+    {
+        snprintf(message, 300, "[%s] Extraction of %s from %s %s.\n",
+                 (ret == EXIT_SUCCESS) ? "INFO" : "ERROR", argv[output_ind], argv[covering_ind], (ret == EXIT_SUCCESS) ? "OK" : "FAILED");
+        (ret == EXIT_SUCCESS) ? printf("%s", message) : fprintf(stderr, "%s", message);
+    }
+
+    return ret;
 }
