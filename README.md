@@ -19,7 +19,7 @@ Information about file extension and size of the covered filed is also stored in
 
 In case the covering file is a jpeg or a png image, it is possible to have an intermediary bitmap (bmp) conversion. In this case, the file to covert will be inserted in the intermediary bmp image. Then this bmp file will be converted into png format *exclusively* (because bmp -> jpg -> bmp conversions generate losses in the last bmp file, making the original file unrecoverable).
 
-size(covering file) >= 8 * size(file to cover) + 96 (in bytes), because 96 bytes are used to store size and extension of the original file, and echa byte of the covering file can cover only one bit of the file to cover (lsb approach). Basically, *any file can be covered in any other file* as long as this condition applies. NB: in case of intermediary bmp conversion, this condition must apply for the bmp conversion of the covering image, not to the covering image itself.
+size(covering file) >= 8 * size(file to cover) + 96 (in bytes), because 96 bytes are used to store size and extension of the original file, and each byte of the covering file can cover only one bit of the file to cover (lsb approach). Basically, *any file can be covered in any other file* as long as this condition applies. NB: in case of intermediary bmp conversion, this condition must apply for the bmp conversion of the covering image, not to the covering image itself.
 
 ## Usage
 
