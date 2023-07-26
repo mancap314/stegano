@@ -1,9 +1,13 @@
 CC = gcc
 CFLAGS = -Wall -Werror
-LDFLAGS = -I. -lfreeimage  # For Linux
-# LDFLAGS = -I. -I..\FreeImage3180Win32Win64\FreeImage\Dist\x64\ -L..\FreeImage3180Win32Win64\FreeImage\Dist\x64\ -lFreeImage  # For Windows, if FreeImage is in ..
+# LDFLAGS = -I. -lfreeimage  # For Linux
+LDFLAGS = -I. -I..\FreeImage3180Win32Win64\FreeImage\Dist\x64\ -L..\FreeImage3180Win32Win64\FreeImage\Dist\x64\ -lFreeImage  # For Windows, if FreeImage is in ..
+TARGET = stegano
+SRC = main.c stegano.c converters.c lsb.c utils.c
 
-stegano: main.c stegano.c converters.c lsb.c utils.c
+all: $(TARGET)
+
+$(TARGET): $(SRC)
 	$(CC) -o $@ $^ $(CFLAGS) $(LDFLAGS)
 
 test_lsb: test/test_lsb.c lsb.c utils.c

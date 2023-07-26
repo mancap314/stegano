@@ -7,7 +7,7 @@ C programm for LSB steganography
 1. Install [FreeImage](https://freeimage.sourceforge.io/)
 2. Clone this repository
 3. [For Windows only] copy FreeImage.dll in the cloned folder. Adapt `LDFLAGS` (see [Makefile](Makefile))
-4. Execute `make stegano`
+4. Execute `make`
 
 ## Description
 
