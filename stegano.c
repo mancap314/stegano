@@ -69,7 +69,6 @@ int emdebed(char *covering_fp, char *tocover_fp, char *output_fp, bool tobmp, bo
             fprintf(stderr, "[ERROR] Could not convert %s to bmp. Exit.\n", covering_fp);
             exit(EXIT_FAILURE);
         }
-        printf("[DEBUG] emdebed(): converted %s to %s.\n", covering_fp, bmp_fp);
     }
 
     if (embed)
@@ -82,7 +81,6 @@ int emdebed(char *covering_fp, char *tocover_fp, char *output_fp, bool tobmp, bo
             // Append .png to output_fp if it's not already its extension
             char output_fp_png[strlen(output_fp) + 5];
             const char *output_ext = get_filename_ext(output_fp);
-            printf("[DEBUG] emdebed(): output_ext: %s\n", output_ext);
             if (strncmp(output_ext, "png", 3)) {
                 snprintf(output_fp_png, sizeof(output_fp_png), "%s%s", output_fp, ".png");
                 ret = bmp2png(bmp_bmp_fp, output_fp_png);

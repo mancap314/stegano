@@ -2,8 +2,6 @@
 
 int jpg2bmp(char *input_fp, char *output_fp)
 {
-    printf("[DEBUG] jpg2bmp(): Called with input_fp=%s and output_fp=%s\n", input_fp, output_fp);
-
     // Load the image using FreeImage
     FIBITMAP *image = FreeImage_Load(FIF_JPEG, input_fp, JPEG_DEFAULT);
     if (!image)
@@ -33,7 +31,6 @@ int jpg2bmp(char *input_fp, char *output_fp)
 
 int bmp2jpg(char *input_fp, char *output_fp)
 {
-    printf("[DEBUG] bmp2jpg(): Called with input_fp=%s and output_fp=%s\n", input_fp, output_fp);
     // Load the image using FreeImage
     FIBITMAP *image = FreeImage_Load(FIF_BMP, input_fp, BMP_DEFAULT);
     if (!image)

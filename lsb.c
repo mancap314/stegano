@@ -78,7 +78,6 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
     unsigned char new_value;
     while (((c_tocover = fgetc(tocover_file)) != EOF) && !feof(tocover_file) && (ncprinted <= covering_flength - (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE))
     {
-        // printf("[DEBUG] lsb_stegging(): c_tocover=%s\n", byte_to_binary(c_tocover));
         for (uint8_t i = 0; i < N_BITS_IN_BYTE; i++)
         {
             new_value = (c_tocover & 1);

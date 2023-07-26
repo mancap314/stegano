@@ -6,46 +6,46 @@
 int main(int argc, char *argv[argc + 1])
 {
     char *usage = "Stegano\nTool for LSB steganography.\nParameters:\n"
-                  "\t-c --covering: path to the file that will contain (insertion) / already containing (extraction) file to cover.\n"
-                  "\t-t --tocover: path to the file to cover (ignored for extraction).\n"
-                  "\t-o --output: path of the file that will contain the inserted file (insertion) / to the file containing the extracted file (extraction).\n"
-                  "\t-a --action: either \"insertion\" or \"extraction\".\n"
-                  "\t-b --bmp: flag (no value). In case of a jpg/jpeg or png file, will insert/extract to/from the covering file converted to bmp format.\n"
+                  "\t-c --covering: path to the file that will contain (insertion) / already containing (extraction) file to cover. Mandatory.\n"
+                  "\t-t --tocover: path to the file to cover. Mandatory for insertion, ignored for extraction\n"
+                  "\t-o --output: path of the file that will contain the inserted file (insertion) / to the file containing the extracted file (extraction). Mandatory.\n"
+                  "\t-a --action: either \"insertion\" or \"extraction\". Default: \"extraction\"\n"
+                  "\t-b --bmp: flag (no value). Converts input file to bmp format. In case of insertion, the input must be in jpg/jpeg or png format, the output will be in png. In case of extraction, the input must be in png format. Default: no bmp conversion.\n"
                   "\t-h --help: print this message.\n";
 
     uint8_t covering_ind = 0, tocover_ind = 0, output_ind = 0;
     bool insertion = false, tobmp = false;
 
-    for (uint8_t i = 1; i < argc + 1; i++)
+    for (uint8_t i = 1; i < argc; i++)
     {
-        if (!strncmp(argv[i], "-h", 2) || !strncmp(argv[i], "--help", 6))
+        if (!strncmp(argv[i], "-h", 3) || !strncmp(argv[i], "--help", 7))
         {
             printf("%s", usage);
             return EXIT_SUCCESS;
         }
-        if (!strncmp(argv[i], "-c", 2) || !strncmp(argv[i], "--covering", 10))
+        if (!strncmp(argv[i], "-c", 3) || !strncmp(argv[i], "--covering", 11))
         {
             i++;
             covering_ind = i;
         }
-        if (!strncmp(argv[i], "-t", 2) || !strncmp(argv[i], "--tocover", 9))
+        if (!strncmp(argv[i], "-t", 3) || !strncmp(argv[i], "--tocover", 10))
         {
             i++;
             tocover_ind = i;
         }
-        if (!strncmp(argv[i], "-o", 2) || !strncmp(argv[i], "--output", 8))
+        if (!strncmp(argv[i], "-o", 3) || !strncmp(argv[i], "--output", 9))
         {
             i++;
             output_ind = i;
         }
-        if (!strncmp(argv[i], "-a", 2) || !strncmp(argv[i], "--action", 8))
+        if (!strncmp(argv[i], "-a", 3) || !strncmp(argv[i], "--action", 9))
         {
             i++;
-            if (!strncmp(argv[i], "insertion", 9))
+            if (!strncmp(argv[i], "insertion", 10))
             {
                 insertion = true;
             }
-            else if (!strncmp(argv[i], "extraction", 10))
+            else if (!strncmp(argv[i], "extraction", 11))
             {
                 insertion = false;
             }
@@ -55,7 +55,7 @@ int main(int argc, char *argv[argc + 1])
                 exit(EXIT_FAILURE);
             }
         }
-        if (!strncmp(argv[i], "bmp", 3))
+        if (!strncmp(argv[i], "-b", 3) || !strncmp(argv[i], "--bmp", 6))
         {
             tobmp = true;
         }
@@ -83,6 +83,14 @@ int main(int argc, char *argv[argc + 1])
     {
         printf("[WARNING] argument -t / --tocover ignored when extracting.\n");
     }
+
+    // Print info message tellig what will be done
+    if (insertion)
+    {
+        printf("[INFO] Covering %s into %s with%s bmp conversion, result in %s\n", argv[tocover_ind], argv[covering_ind], tobmp ? "" : " no", argv[output_ind]);
+    }
+    else
+        printf("[INFO] Extracting from %s with%s bmp conversion, result in %s\n", argv[covering_ind], tobmp ? "" : " no", argv[output_ind]);
 
     int ret = emdebed(argv[covering_ind], argv[tocover_ind], argv[output_ind], tobmp, insertion);
 
