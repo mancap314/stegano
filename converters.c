@@ -2,13 +2,14 @@
 
 int jpg2bmp(char *input_fp, char *output_fp)
 {
+    printf("[DEBUG] jpg2bmp(): Called with input_fp=%s and output_fp=%s\n", input_fp, output_fp);
 
     // Load the image using FreeImage
     FIBITMAP *image = FreeImage_Load(FIF_JPEG, input_fp, JPEG_DEFAULT);
     if (!image)
     {
-        printf("Failed to load image: %s\n", input_fp);
-        return 1;
+        printf("[ERROR] jpg2bmp(): Failed to load image: %s\n", input_fp);
+        return EXIT_FAILURE;
     }
 
     // Convert the image to 24-bit bitmap format
@@ -18,26 +19,26 @@ int jpg2bmp(char *input_fp, char *output_fp)
     // Save the bitmap to a file
     if (!FreeImage_Save(FIF_BMP, bitmap, output_fp, BMP_DEFAULT))
     {
-        printf("Failed to save image: %s\n", output_fp);
+        printf("[ERROR] jpg2bmp(): Failed to save image: %s\n", output_fp);
         FreeImage_Unload(bitmap);
         return EXIT_FAILURE;
     }
 
     FreeImage_Unload(bitmap);
 
-    printf("Image converted successfully: from %s to %s\n", input_fp, output_fp);
+    printf("[INFO] jpg2bmp(): Image converted successfully: from %s to %s\n", input_fp, output_fp);
 
     return EXIT_SUCCESS;
 }
 
 int bmp2jpg(char *input_fp, char *output_fp)
 {
-
+    printf("[DEBUG] bmp2jpg(): Called with input_fp=%s and output_fp=%s\n", input_fp, output_fp);
     // Load the image using FreeImage
     FIBITMAP *image = FreeImage_Load(FIF_BMP, input_fp, BMP_DEFAULT);
     if (!image)
     {
-        printf("Failed to load image: %s\n", input_fp);
+        printf("[ERROR] bmp2jpg(): Failed to load image: %s\n", input_fp);
         return EXIT_FAILURE;
     }
 
@@ -46,16 +47,16 @@ int bmp2jpg(char *input_fp, char *output_fp)
     FreeImage_Unload(image);
 
     // Save the bitmap to a JPG file
-    if (!FreeImage_Save(FIF_JPEG, bitmap, output_fp, JPEG_QUALITYGOOD))
+    if (!FreeImage_Save(FIF_JPEG, bitmap, output_fp, JPEG_QUALITYSUPERB))
     {
-        printf("Failed to save image: %s\n", output_fp);
+        printf("[ERROR] bmp2jpg(): Failed to save image: %s\n", output_fp);
         FreeImage_Unload(bitmap);
         return EXIT_FAILURE;
     }
 
     FreeImage_Unload(bitmap);
 
-    printf("Image converted successfully: from %s to %s\n", input_fp, output_fp);
+    printf("[INFO] bmp2jpg(): Image converted successfully: from %s to %s\n", input_fp, output_fp);
 
     return EXIT_SUCCESS;
 }
