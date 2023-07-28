@@ -1,4 +1,4 @@
- #include "stegano.h"
+#include "stegano.h"
 #include "utils.h"
 #include "converters.h"
 #include "lsb.h"
@@ -54,7 +54,8 @@ int emdebed(char *covering_fp, char *tocover_fp, char *output_fp, bool tobmp, bo
 
     bool is_jpg = (!strncmp(ext, "jpg", 3) || !strncmp(ext, "jpeg", 4));
 
-    if (is_jpg && tobmp && !embed) {
+    if (is_jpg && tobmp && !embed)
+    {
         perror("[ERROR] emdebed(): Cannot extract from jpg image through bmp conversion (loss)");
         return EXIT_FAILURE;
     }
@@ -73,18 +74,26 @@ int emdebed(char *covering_fp, char *tocover_fp, char *output_fp, bool tobmp, bo
 
     if (embed)
     {
-        if (converted) {
+        if (converted)
+        {
             char bmp_bmp_fp[strlen(covering_fp) + 10];
             snprintf(bmp_bmp_fp, sizeof(bmp_bmp_fp), "%s%s", bmp_fp, ".bmp");
             // Stegging in first bmp, resulting in second bmp
-            lsb_stegging(bmp_fp, tocover_fp, bmp_bmp_fp);
+            ret = lsb_stegging(bmp_fp, tocover_fp, bmp_bmp_fp);
+            if (ret == EXIT_FAILURE && remove(bmp_fp) != 0)
+            {
+                printf("[WARNING] emdebed(): Could not delete %s.\n", bmp_bmp_fp);
+                exit(EXIT_FAILURE);
+            }
             // Append .png to output_fp if it's not already its extension
             char output_fp_png[strlen(output_fp) + 5];
             const char *output_ext = get_filename_ext(output_fp);
-            if (strncmp(output_ext, "png", 3)) {
+            if (strncmp(output_ext, "png", 3))
+            {
                 snprintf(output_fp_png, sizeof(output_fp_png), "%s%s", output_fp, ".png");
                 ret = bmp2png(bmp_bmp_fp, output_fp_png);
-            } else 
+            }
+            else
                 ret = bmp2png(bmp_bmp_fp, output_fp);
             if (ret == EXIT_FAILURE)
             {
@@ -94,9 +103,13 @@ int emdebed(char *covering_fp, char *tocover_fp, char *output_fp, bool tobmp, bo
             // Remove second bmp
             if (remove(bmp_bmp_fp) != 0)
                 printf("[WARNING] emdebed(): Could not delete %s.\n", bmp_bmp_fp);
-
-        } else
-            lsb_stegging(covering_fp, tocover_fp, output_fp);
+        }
+        else
+        {
+            ret = lsb_stegging(covering_fp, tocover_fp, output_fp);
+            if (ret == EXIT_FAILURE)
+                exit(EXIT_FAILURE);
+        }
     }
     else
     {
