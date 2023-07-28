@@ -46,13 +46,22 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
 
     if ((covering_flength - 1) < (N_BITS_IN_BYTE * (tocover_flength + CHFORFS + CHFOREXT)))
     {
-        fprintf(stderr, "[ERROR] lsb stegging(): %s has size %llu; but max. %llu can be lsb-stegg'ed in %s of size %llu.\n", tocover_fp, tocover_flength, (size_t)((covering_flength - 1) / N_BITS_IN_BYTE - CHFORFS - CHFOREXT), covering_fp, covering_flength);
+        fprintf(stderr, "[ERROR] lsb stegging(): %s has size %llu; but max. %llu can be lsb-stegg'ed in %s of size %llu.\n",
+                tocover_fp,
+                (long long unsigned int)tocover_flength,
+                (long long unsigned int)((covering_flength - 1) / N_BITS_IN_BYTE - CHFORFS - CHFOREXT),
+                covering_fp,
+                (long long unsigned int)covering_flength);
         fclose(tocover_file);
         fclose(covering_file);
         return EXIT_FAILURE;
     }
 
-    printf("[INFO] lsb stegging(): size of %s (covering): %llu ; size of %s (to cover): %llu\n", covering_fp, covering_flength, tocover_fp, tocover_flength);
+    printf("[INFO] lsb stegging(): size of %s (covering): %llu ; size of %s (to cover): %llu\n",
+           covering_fp,
+           (long long unsigned int)covering_flength,
+           tocover_fp,
+           (long long unsigned int)tocover_flength);
 
     // OUTPUT FILE
     FILE *output_file = fopen(output_fp, "wb");
@@ -111,7 +120,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
 
     // Writing the number of bytes to read
     char fsarr[CHFORFS + 1] = {0}; // containing tocover_flength as a string
-    snprintf(fsarr, CHFORFS + 1, "%lld", tocover_flength);
+    snprintf(fsarr, CHFORFS + 1, "%llu", (long long unsigned int)tocover_flength);
     uint8_t fsarr_ind = 0;
     while ((fsarr_ind < CHFORFS) && (ncprinted <= covering_flength))
     {
@@ -161,7 +170,10 @@ int lsb_unstegging(char *input_fp, char *output_fp)
     // Read message extension and size
     if (input_flength < (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE)
     {
-        fprintf(stderr, "[ERROR] lsb_unstegging(): reading message length: size of %s : %llu < %u\n", input_fp, input_flength, CHFORFS * N_BITS_IN_BYTE);
+        fprintf(stderr, "[ERROR] lsb_unstegging(): reading message length: size of %s : %llu < %u\n",
+                input_fp,
+                (long long unsigned int)input_flength,
+                CHFORFS * N_BITS_IN_BYTE);
         return EXIT_FAILURE;
     }
     unsigned char ch;
@@ -195,10 +207,13 @@ int lsb_unstegging(char *input_fp, char *output_fp)
     }
 
     size_t message_size = (size_t)atoi(fsarr);
-    printf("[INFO] lsb_unstegging(): message_extension=%s, message_size=%llu\n", extarr, message_size);
+    printf("[INFO] lsb_unstegging(): message_extension=%s, message_size=%llu\n", extarr, (long long unsigned int)message_size);
     if (input_flength < (message_size + CHFORFS) * N_BITS_IN_BYTE)
     {
-        fprintf(stderr, "[ERROR] lsb_unstegging(): size of %s: %llu too small for message size: %llu\n", input_fp, input_flength, message_size);
+        fprintf(stderr, "[ERROR] lsb_unstegging(): size of %s: %llu too small for message size: %llu\n",
+                input_fp,
+                (long long unsigned int)input_flength,
+                (long long unsigned int)message_size);
         return EXIT_FAILURE;
     }
 

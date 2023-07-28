@@ -50,7 +50,7 @@ int copy_file(char *inpath, char *outpath)
         fputc(ch, destFile);
         n_bytes_copied++;
         if (n_bytes_copied % 1000 == 0)
-            printf("%llu kb copied\n", n_bytes_copied / 1000);
+            printf("%llu kb copied\n", (long long unsigned int)n_bytes_copied / 1000);
     }
 
     printf("File copied successfully.\n");
