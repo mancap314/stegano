@@ -183,7 +183,7 @@ int lsb_unstegging(char *input_fp, char *output_fp)
     char fsarr[CHFORFS + 1] = {0};
     unsigned char extracted_ch = 0;
     fseek(input_file, (input_flength - 2 - (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE), SEEK_SET);
-    while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread < CHFORFS * N_BITS_IN_BYTE))
+    while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread < (CHFORFS + CHFOREXT) * N_BITS_IN_BYTE))
     {
         extracted_ch = extracted_ch | (ch & 1);
         extracted_ch <<= 1;
@@ -219,6 +219,7 @@ int lsb_unstegging(char *input_fp, char *output_fp)
 
     // Read Message and write it in the output
     ncread = 0;
+    read_ind = 0; // added for DEBUG
     FILE *output_file;
     char output_fp_ext[strlen(output_fp) + 1 + CHFOREXT + 1];
     if (strlen(extarr) == 0)
@@ -236,14 +237,15 @@ int lsb_unstegging(char *input_fp, char *output_fp)
         return EXIT_FAILURE;
     }
     fseek(input_file, (input_flength - 2 - (message_size + CHFORFS + CHFOREXT) * N_BITS_IN_BYTE), SEEK_SET);
-    while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread < message_size * N_BITS_IN_BYTE))
+    while (((ch = fgetc(input_file)) != EOF) && !feof(input_file) && (ncread <= message_size * N_BITS_IN_BYTE))
     {
         extracted_ch = extracted_ch | (ch & 1);
         extracted_ch <<= 1;
         if (((ncread % N_BITS_IN_BYTE) == 0) && ncread > 0)
         {
             extracted_ch = reverse(extracted_ch);
-            read_ind = ncread / N_BITS_IN_BYTE - 1;
+            // read_ind = ncread / N_BITS_IN_BYTE - 1;
+            read_ind++;
             fputc(extracted_ch, output_file);
             extracted_ch = 0;
         }
