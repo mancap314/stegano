@@ -120,7 +120,7 @@ int lsb_stegging(char *covering_fp, char *tocover_fp, char *output_fp)
 
     // Writing the number of bytes to read
     char fsarr[CHFORFS + 1] = {0}; // containing tocover_flength as a string
-    snprintf(fsarr, CHFORFS + 1, "%llu", (long long unsigned int)tocover_flength);
+    snprintf(fsarr, CHFORFS + 1, "%u", (unsigned int)tocover_flength);
     uint8_t fsarr_ind = 0;
     while ((fsarr_ind < CHFORFS) && (ncprinted <= covering_flength))
     {

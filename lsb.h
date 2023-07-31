@@ -9,7 +9,7 @@
 #define N_BITS_IN_BYTE 8
 #define BUFFER_SIZE 1000
 // Number of characters for file size: CHFORFS
-#define CHFORFS 8
+#define CHFORFS 10
 // Number of characters for file extension: CHFOREXT
 #define CHFOREXT 4
 
